@@ -3,10 +3,7 @@
     <ion-title>home</ion-title>
   </ion-toolbar>
   <ion-searchbar placeholder="Search for an item to borrow" debounce="500"></ion-searchbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
-  <div class="chip-segment-scroll">
+    <div class="chip-segment-scroll">
     <ion-chip
       [outline]="departmentFilter !== 'all'"
       color="primary"
@@ -41,7 +38,9 @@
       <ion-label>PAO</ion-label>
     </ion-chip>
   </div>
+</ion-header>
 
+<ion-content [fullscreen]="true">
   <ion-grid>
     <ion-row>
       <ion-col size="6" size-md="2.4" *ngIf="departmentFilter === 'all' || departmentFilter === 'SCS'">
@@ -63,7 +62,7 @@
           <ion-button fill="clear" color="primary" routerLink="/tabs/item">Borrow Item</ion-button>
         </ion-card>
       </ion-col>
-      <ion-col size="6" size-md="2.4" *ngIf="departmentFilter === 'all' || departmentFilter === 'SCS'">
+      <ion-col size="6" size-md="2.4" *ngIf="departmentFilter === 'all' || departmentFilter === 'IMC'">
         <ion-card>
           <img src="assets/items/scissors.png" alt="Scissors" />
           <ion-card-header class="card-header-badge">
@@ -75,11 +74,11 @@
           <ion-card-content>
             <div style="font-weight: bold; color: #888; margin-bottom: 4px;">#234567</div>
             Stainless steel scissors.
-            <ion-chip color="danger" class="card-badge" style="margin-bottom: 8px;">
-              <ion-label>Borrowed</ion-label>
+            <ion-chip color="warning" class="card-badge">
+              <ion-label>Borrowing</ion-label>
             </ion-chip>
           </ion-card-content>
-          <ion-button fill="clear" color="primary" routerLink="/tabs/item">Borrow Item</ion-button>
+          <ion-button fill="clear" color="primary" routerLink="/tabs/item" disabled>Item Unavailable</ion-button>
         </ion-card>
       </ion-col>
       <ion-col size="6" size-md="2.4" *ngIf="departmentFilter === 'all' || departmentFilter === 'PAO'">
@@ -136,7 +135,7 @@
               <ion-label>Borrowed</ion-label>
             </ion-chip>
           </ion-card-content>
-          <ion-button fill="clear" color="primary" routerLink="/tabs/item">Borrow Item</ion-button>
+          <ion-button fill="clear" color="primary" routerLink="/tabs/item" disabled>Item Unavailable</ion-button>
         </ion-card>
       </ion-col>
       <ion-col size="6" size-md="2.4" *ngIf="departmentFilter === 'all' || departmentFilter === 'PAO'">
