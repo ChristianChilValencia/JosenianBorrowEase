@@ -2,26 +2,84 @@
   <ion-toolbar>
     <ion-title>home</ion-title>
   </ion-toolbar>
+  <ion-searchbar placeholder="Search for an item to borrow" debounce="500"></ion-searchbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <ion-grid>
     <ion-row>
-      <ion-col size="6" size-md="3">
+      <ion-col size="6" size-md="2.4">
         <ion-card>
+          <img src="assets/items/monitor.png" alt="Monitor" />
           <ion-card-header>
-            <ion-card-title>Item</ion-card-title>
+            <ion-card-title>Monitor</ion-card-title>
           </ion-card-header>
           <ion-card-content>
-            This is a simple home page layout using Ionic components.
+            24" LED Monitor. Available.
           </ion-card-content>
-          <ion-button color="primary" routerLink="/tabs/item">
-            Go to Details 
-          </ion-button>
+          <ion-button fill="clear" color="primary" routerLink="/tabs/item">Borrow Item</ion-button>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6" size-md="2.4">
+        <ion-card>
+          <img src="assets/items/scissors.png" alt="Scissors" />
+          <ion-card-header>
+            <ion-card-title>Scissors</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            Stainless steel scissors. Borrowed.
+          </ion-card-content>
+          <ion-button fill="clear" color="primary" routerLink="/tabs/item">Borrow Item</ion-button>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6" size-md="2.4">
+        <ion-card>
+          <img src="assets/items/laptop.png" alt="Laptop" />
+          <ion-card-header>
+            <ion-card-title>Laptop</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            Dell Inspiron 15. Available.
+          </ion-card-content>
+          <ion-button fill="clear" color="primary" routerLink="/tabs/item">Borrow Item</ion-button>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6" size-md="2.4">
+        <ion-card>
+          <img src="assets/items/cables.png" alt="Cables" />
+          <ion-card-header>
+            <ion-card-title>Ethernet Cables</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            Assorted power and USB cables. Available.
+          </ion-card-content>
+            <ion-button fill="clear" color="primary" routerLink="/tabs/item" disabled>Item Unavailable</ion-button>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6" size-md="2.4">
+        <ion-card>
+          <img src="assets/items/projector.png" alt="Projector" />
+          <ion-card-header>
+            <ion-card-title>Projector</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            Epson XGA Projector. Borrowed.
+          </ion-card-content>
+          <ion-button fill="clear" color="primary" routerLink="/tabs/item">Borrow Item</ion-button>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6" size-md="2.4">
+        <ion-card>
+          <img src="assets/items/hdmi-adapter.png" alt="HDMI Adapter" />
+          <ion-card-header>
+            <ion-card-title>HDMI Adapter</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            HDMI to VGA Adapter. Available.
+          </ion-card-content>
+          <ion-button fill="clear" color="primary" routerLink="/tabs/item">Borrow Item</ion-button>
         </ion-card>
       </ion-col>
     </ion-row>
   </ion-grid>
-
-
 </ion-content>
