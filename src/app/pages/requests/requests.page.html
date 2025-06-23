@@ -10,4 +10,118 @@
       <ion-title size="large">requests</ion-title>
     </ion-toolbar>
   </ion-header>
+
+  <ion-segment [(ngModel)]="requestStatus" value="waiting" color="primary">
+    <ion-segment-button value="waiting">
+      <ion-label>⏳</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="approved">
+      <ion-label>✅</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="not-approved">
+      <ion-label>❌</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <ion-list *ngIf="requestStatus === 'approved'">
+    <ion-item button routerLink="/tabs/item">
+      <ion-avatar slot="start">
+        <ion-img src="assets/items/scissors.png" alt="Scissors"></ion-img>
+      </ion-avatar>
+      <ion-label>
+        <h2>
+          Scissors
+          <ion-badge color="primary" style="margin-left:8px;">PAO</ion-badge>
+        </h2>
+        <p>Status: Approved</p>
+        <p>Quantity: 3</p>
+      </ion-label>
+      <ion-badge slot="end" color="danger">Overdue</ion-badge>
+    </ion-item>
+    <ion-item button routerLink="/tabs/item">
+      <ion-avatar slot="start">
+        <ion-img src="assets/items/laptop.png" alt="Laptop"></ion-img>
+      </ion-avatar>
+      <ion-label>
+        <h2>
+          Laptop
+          <ion-badge color="success" style="margin-left:8px;">SCS</ion-badge>
+        </h2>
+        <p>Status: Approved</p>
+        <p>Quantity: 2</p>
+      </ion-label>
+      <ion-badge slot="end" color="success">Borrowed</ion-badge>
+    </ion-item>
+  </ion-list>
+
+  <ion-list *ngIf="requestStatus === 'waiting'">
+    <ion-item button routerLink="/tabs/item">
+      <ion-avatar slot="start">
+        <ion-img src="assets/items/monitor.png" alt="Monitor"></ion-img>
+      </ion-avatar>
+      <ion-label>
+        <h2>
+          Monitor
+          <ion-badge color="warning" style="margin-left:8px;">SCS</ion-badge>
+        </h2>
+        <p>Status: Waiting</p>
+        <p>Quantity: 1</p>
+      </ion-label>
+    </ion-item>
+    <ion-item button routerLink="/tabs/item">
+      <ion-avatar slot="start">
+        <ion-img src="assets/items/laptop.png" alt="Laptop 1"></ion-img>
+      </ion-avatar>
+      <ion-label>
+        <h2>
+          Laptop 1
+          <ion-badge color="primary" style="margin-left:8px;">PAO</ion-badge>
+        </h2>
+        <p>Status: Waiting</p>
+        <p>Quantity: 1</p>
+      </ion-label>
+    </ion-item>
+    <ion-item button routerLink="/tabs/item">
+      <ion-avatar slot="start">
+        <ion-img src="assets/items/projector.png" alt="Projector"></ion-img>
+      </ion-avatar>
+      <ion-label>
+        <h2>
+          Projector
+          <ion-badge color="success" style="margin-left:8px;">IMC</ion-badge>
+        </h2>
+        <p>Status: Waiting</p>
+        <p>Quantity: 2</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ion-list *ngIf="requestStatus === 'not-approved'">
+    <ion-item button routerLink="/tabs/item">
+      <ion-avatar slot="start">
+        <ion-img src="assets/items/laptop.png" alt="Laptop 2"></ion-img>
+      </ion-avatar>
+      <ion-label>
+        <h2>
+          Laptop 2
+          <ion-badge color="success" style="margin-left:8px;">SCS</ion-badge>
+        </h2>
+        <p>Status: Not Approved</p>
+        <p>Quantity: 1</p>
+      </ion-label>
+    </ion-item>
+    <ion-item button routerLink="/tabs/item">
+      <ion-avatar slot="start">
+        <ion-img src="assets/items/scissors.png" alt="Scissors"></ion-img>
+      </ion-avatar>
+      <ion-label>
+        <h2>
+          Scissors
+          <ion-badge color="primary" style="margin-left:8px;">PAO</ion-badge>
+        </h2>
+        <p>Status: Not Approved</p>
+        <p>Quantity: 2</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
 </ion-content>

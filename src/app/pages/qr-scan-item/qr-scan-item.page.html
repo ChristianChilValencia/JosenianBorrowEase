@@ -1,13 +1,26 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>qr scan item</ion-title>
+    <ion-title>Scan QR Code</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="ion-padding">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">qr scan item</ion-title>
+      <ion-title size="large">Scan QR Code</ion-title>
     </ion-toolbar>
   </ion-header>
+
+  <div style="display: flex; flex-direction: column; align-items: center; margin-top: 48px;">
+    <div 
+      style="position: relative; width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; cursor: pointer;"
+      routerLink="/tabs/item"
+    >
+      <ion-icon name="scan-outline" style="font-size: 180px; color: #3880ff; position: absolute; left: 0; top: 0;"></ion-icon>
+      <img src="assets/items/qr.png" alt="QR" style="width: 90px; height: 90px; position: absolute; left: 45px; top: 45px;" />
+    </div>
+    <p style="margin-top: 16px; font-size: 1.1rem; text-align: center; max-width: 350px;">
+      Aim your camera at the item's QR code to check its availability or begin the borrowing process.
+    </p>
+  </div>
 </ion-content>

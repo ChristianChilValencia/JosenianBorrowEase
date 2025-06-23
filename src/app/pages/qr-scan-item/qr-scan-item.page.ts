@@ -13,4 +13,5 @@ export class QrScanItemPage implements OnInit {
   ngOnInit() {
   }
 
+  
 }

@@ -7,6 +7,7 @@ import { Component, OnInit } from '@angular/core';
   standalone: false
 })
 export class RequestsPage implements OnInit {
+  requestStatus: string = 'waiting';
 
   constructor() { }
 
