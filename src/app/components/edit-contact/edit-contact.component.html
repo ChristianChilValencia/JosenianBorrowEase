@@ -1,0 +1,90 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Edit Contact</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="isLoading" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Loading contact...</p>
+  </div>
+
+  <form [formGroup]="contactForm" (ngSubmit)="updateContact()" *ngIf="!isLoading">
+    <!-- First Name -->
+    <ion-item>
+      <ion-label position="floating">First Name <ion-text color="danger">*</ion-text></ion-label>
+      <ion-input formControlName="firstName" type="text" required></ion-input>
+    </ion-item>
+    <ion-note color="danger" *ngIf="contactForm.get('firstName')?.hasError('required') && contactForm.get('firstName')?.touched">
+      First name is required
+    </ion-note>
+    <ion-note color="danger" *ngIf="contactForm.get('firstName')?.hasError('minlength') && contactForm.get('firstName')?.touched">
+      First name must be at least 2 characters long
+    </ion-note>
+    
+    <!-- Last Name -->
+    <ion-item class="ion-margin-top">
+      <ion-label position="floating">Last Name <ion-text color="danger">*</ion-text></ion-label>
+      <ion-input formControlName="lastName" type="text" required></ion-input>
+    </ion-item>
+    <ion-note color="danger" *ngIf="contactForm.get('lastName')?.hasError('required') && contactForm.get('lastName')?.touched">
+      Last name is required
+    </ion-note>
+    <ion-note color="danger" *ngIf="contactForm.get('lastName')?.hasError('minlength') && contactForm.get('lastName')?.touched">
+      Last name must be at least 2 characters long
+    </ion-note>
+    
+    <!-- Phone Number -->
+    <ion-item class="ion-margin-top">
+      <ion-label position="floating">Phone Number <ion-text color="danger">*</ion-text></ion-label>
+      <ion-input formControlName="phoneNumber" type="tel" required></ion-input>
+    </ion-item>
+    <ion-note color="danger" *ngIf="contactForm.get('phoneNumber')?.hasError('required') && contactForm.get('phoneNumber')?.touched">
+      Phone number is required
+    </ion-note>
+    <ion-note color="danger" *ngIf="contactForm.get('phoneNumber')?.hasError('pattern') && contactForm.get('phoneNumber')?.touched">
+      Please enter a valid phone number
+    </ion-note>
+    
+    <!-- Email -->
+    <ion-item class="ion-margin-top">
+      <ion-label position="floating">Email</ion-label>
+      <ion-input formControlName="email" type="email"></ion-input>
+    </ion-item>
+    <ion-note color="danger" *ngIf="contactForm.get('email')?.hasError('email') && contactForm.get('email')?.touched">
+      Please enter a valid email address
+    </ion-note>
+    
+    <!-- Address -->
+    <ion-item class="ion-margin-top">
+      <ion-label position="floating">Address</ion-label>
+      <ion-textarea formControlName="address" rows="2"></ion-textarea>
+    </ion-item>
+    
+    <!-- Notes -->
+    <ion-item class="ion-margin-top">
+      <ion-label position="floating">Notes</ion-label>
+      <ion-textarea formControlName="notes" rows="3"></ion-textarea>
+    </ion-item>
+
+    <div *ngIf="contact?.createdAt" class="timestamp-info ion-padding-top">
+      <ion-text color="medium">
+        <p>Created: {{ contact?.createdAt | date:'medium' }}</p>
+        <p *ngIf="contact?.updatedAt">Last Updated: {{ contact?.updatedAt | date:'medium' }}</p>
+      </ion-text>
+    </div>
+
+    <div class="ion-padding-top">
+      <ion-button expand="block" type="submit" [disabled]="contactForm.invalid || isSubmitting">
+        <ion-icon name="save-outline" slot="start"></ion-icon>
+        Update Contact
+      </ion-button>
+    </div>
+  </form>
+</ion-content>
