@@ -46,13 +46,13 @@
             <ion-card-content>
               <ion-grid>
                 <ion-row>
-                  <ion-col size="6">
+                  <ion-col size="4">
+<img [src]="getRequestImage(request) || 'assets/items/default-item.png'" alt="{{ request.itemName }}" style="max-width: 100px; max-height: 100px; border-radius: 8px; margin-bottom: 8px;">                  </ion-col>
+                  <ion-col size="8">
                     <p><strong>Requested by:</strong> {{ request.requesterName }}</p>
                     <p><strong>Email:</strong> {{ request.requesterEmail }}</p>
                     <p><strong>Purpose:</strong> {{ request.purpose || request.reason }}</p>
                     <p><strong>Department:</strong> {{ request.department }}</p>
-                  </ion-col>
-                  <ion-col size="6">
                     <p><strong>Requested:</strong> {{ formatDate(request.requestDate) }}</p>
                     <p><strong>Return by:</strong> {{ formatDate(request.returnDate) }}</p>
                     <p><strong>Item Code:</strong> {{ request.itemCode || request.itemId }}</p>
@@ -143,15 +143,19 @@
           </ion-note>
         </ion-item>
         
-        <div class="ion-padding">
-          <ion-label>Item Image</ion-label>
-          <input type="file" accept="image/*" (change)="onImageSelected($event)" class="ion-margin-top">
-        </div>
+        <ion-item>
+          <ion-label position="stacked">Item Image</ion-label>
+          <ion-select formControlName="image" placeholder="Select an image">
+            <ion-select-option *ngFor="let img of imageOptions" [value]="img">
+              {{ img.split('/').pop() }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
         
         <!-- Image preview -->
-        <div *ngIf="previewImage" class="ion-padding">
+        <div *ngIf="itemForm.get('image')?.value" class="ion-padding">
           <h4>Image Preview</h4>
-          <img [src]="previewImage" style="max-width: 100%; max-height: 200px;">
+          <img [src]="itemForm.get('image')?.value" style="max-width: 100%; max-height: 200px;">
         </div>
         
         <div class="ion-padding">

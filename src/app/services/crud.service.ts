@@ -14,7 +14,7 @@ import {
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
-import { firebaseConfig } from '../../environments/environment';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -32,7 +32,7 @@ export class CrudService {
     } catch (error) {
       console.error('Error initializing Firestore, trying fallback:', error);
       // Fallback initialization if the app-level initialization failed
-      const app = initializeApp(firebaseConfig);
+      const app = initializeApp(environment.firebase)
       this.firestore = getFirestore(app);
       console.log('Firestore initialized with fallback method');
     }

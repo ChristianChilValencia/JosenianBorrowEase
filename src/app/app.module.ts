@@ -5,7 +5,9 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 import { getFirestore } from 'firebase/firestore';
-import { firebaseConfig } from '../environments/environment';
+import { environment } from '../environments/environment';
+import { provideFirebaseApp } from '@angular/fire/app';
+import { provideStorage, getStorage } from '@angular/fire/storage';
 
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 
@@ -16,7 +18,7 @@ import { AppComponent } from './app.component';
 
 // Initialize Firebase at application level
 console.log('Initializing Firebase in app.module.ts');
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(environment.firebase)
 // Initialize Firestore
 const firestore = getFirestore(app);
 console.log('Firestore initialized in app.module.ts');
@@ -30,8 +32,9 @@ const analytics = getAnalytics(app);
     IonicModule.forRoot(), 
     AppRoutingModule,
     ReactiveFormsModule,
-    FormsModule
-    // ComponentsModule is no longer needed
+    FormsModule,
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideStorage(() => getStorage()),
   ],
   providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],
   bootstrap: [AppComponent],

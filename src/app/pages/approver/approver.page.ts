@@ -39,6 +39,16 @@ export class ApproverPage implements OnInit, OnDestroy {
   selectedImageFile: File | null = null;
   previewImage: string | ArrayBuffer | null = null;
   
+  imageOptions: string[] = [
+    'assets/items/cables.png',
+    'assets/items/hdmi-adapter.png',
+    'assets/items/laptop.png',
+    'assets/items/monitor.png',
+    'assets/items/projector.png',
+    'assets/items/scissors.png',
+    'assets/items/cables.png',
+  ];
+  
   private requestsSubscription: Subscription | null = null;
   private itemsSubscription: Subscription | null = null;
 
@@ -57,7 +67,8 @@ export class ApproverPage implements OnInit, OnDestroy {
       description: ['', [Validators.required]],
       department: ['', [Validators.required]],
       productCode: ['', [Validators.required]],
-      status: ['available', [Validators.required]]
+      status: ['available', [Validators.required]],
+      image: ['', [Validators.required]],
     });
   }
 
@@ -193,6 +204,11 @@ export class ApproverPage implements OnInit, OnDestroy {
       const errorMessage = error.message || 'Failed to add item. Please try again.';
       this.showAlert('Error', errorMessage);
     }
+  }
+
+  getRequestImage(request: BorrowRequest): string | undefined {
+    const item = this.items.find(i => i.id === request.itemId || i.productCode === request.itemCode);
+    return item?.image;
   }
 
   async approveRequest(request: BorrowRequest) {
