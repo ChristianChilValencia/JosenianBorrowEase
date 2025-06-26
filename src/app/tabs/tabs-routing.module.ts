@@ -32,6 +32,10 @@ const routes: Routes = [
     path: 'profile',
     loadChildren: () => import('../pages/profile/profile.module').then( m => m.ProfilePageModule)
   },
+  {
+    path: 'approver',
+    loadChildren: () => import('../pages/approver/approver.module').then( m => m.ApproverPageModule)
+  },
       {
         path: '',
         redirectTo: '/tabs/home',
