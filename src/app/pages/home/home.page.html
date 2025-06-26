@@ -2,12 +2,12 @@
   <ion-toolbar>
     <ion-title>home</ion-title>
   </ion-toolbar>
-  <ion-searchbar placeholder="Search for an item to borrow" debounce="500"></ion-searchbar>
+  <ion-searchbar placeholder="Search for an item to borrow" debounce="500" (ionChange)="onSearch($event)" [(ngModel)]="searchTerm"></ion-searchbar>
     <div class="chip-segment-scroll">
     <ion-chip
       [outline]="departmentFilter !== 'all'"
       color="primary"
-      (click)="departmentFilter = 'all'"
+      (click)="onDepartmentChange('all')"
       [class.selected]="departmentFilter === 'all'"
       style="margin-right: 8px; cursor: pointer;"
     >
@@ -16,7 +16,7 @@
     <ion-chip
       [outline]="departmentFilter !== 'IMC'"
       style="background: #007A33; color: #fff; margin-right: 8px; cursor: pointer;"
-      (click)="departmentFilter = 'IMC'"
+      (click)="onDepartmentChange('IMC')"
       [class.selected]="departmentFilter === 'IMC'"
     >
       <ion-label>IMC</ion-label>
@@ -24,7 +24,7 @@
     <ion-chip
       [outline]="departmentFilter !== 'SCS'"
       style="background: #FFD100; color: #212121; margin-right: 8px; cursor: pointer;"
-      (click)="departmentFilter = 'SCS'"
+      (click)="onDepartmentChange('SCS')"
       [class.selected]="departmentFilter === 'SCS'"
     >
       <ion-label>SCS</ion-label>
@@ -32,7 +32,7 @@
     <ion-chip
       [outline]="departmentFilter !== 'PAO'"
       style="background: #1DB954; color: #fff; margin-right: 8px; cursor: pointer;"
-      (click)="departmentFilter = 'PAO'"
+      (click)="onDepartmentChange('PAO')"
       [class.selected]="departmentFilter === 'PAO'"
     >
       <ion-label>PAO</ion-label>
@@ -41,120 +41,60 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-grid>
+  <ion-refresher slot="fixed" (ionRefresh)="refreshItems($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading spinner -->
+  <div class="ion-text-center" *ngIf="isLoading">
+    <ion-spinner name="circles"></ion-spinner>
+    <p>Loading items...</p>
+  </div>
+
+  <!-- No items message -->
+  <ion-grid *ngIf="!isLoading && filteredItems.length === 0">
     <ion-row>
-      <ion-col size="6" size-md="2.4" *ngIf="departmentFilter === 'all' || departmentFilter === 'SCS'">
-        <ion-card>
-          <img src="assets/items/monitor.png" alt="Monitor" />
-          <ion-card-header class="card-header-badge">
-            <ion-card-title>Monitor</ion-card-title>
-            <ion-chip color="warning" style="margin-left: 8px; background: #FFD100; color: #212121;">
-              <ion-label>SCS</ion-label>
-            </ion-chip>
-          </ion-card-header>
-          <ion-card-content>
-            <div style="font-weight: bold; color: #888; margin-bottom: 4px;">#123456</div>
-            24" LED Monitor.
-            <ion-chip color="success" class="card-badge" style="margin-bottom: 8px;">
-              <ion-label>Available</ion-label>
-            </ion-chip>
-          </ion-card-content>
-          <ion-button fill="clear" color="primary" routerLink="/tabs/item">Borrow Item</ion-button>
-        </ion-card>
+      <ion-col class="ion-text-center">
+        <ion-icon name="alert-circle-outline" size="large" color="medium"></ion-icon>
+        <p>No items found. Try changing your filter or search criteria.</p>
       </ion-col>
-      <ion-col size="6" size-md="2.4" *ngIf="departmentFilter === 'all' || departmentFilter === 'IMC'">
-        <ion-card>
-          <img src="assets/items/scissors.png" alt="Scissors" />
+    </ion-row>
+  </ion-grid>
+
+  <!-- Items grid -->
+  <ion-grid *ngIf="!isLoading && filteredItems.length > 0">
+    <ion-row>
+      <ion-col size="6" size-md="2.4" *ngFor="let item of filteredItems">
+        <ion-card (click)="viewItem(item)">
+          <img [src]="item.image || 'assets/items/default-item.png'" [alt]="item.name" />
           <ion-card-header class="card-header-badge">
-            <ion-card-title>Scissors</ion-card-title>
-            <ion-chip color="primary" style="margin-left: 8px; background: #007A33; color: #fff;">
-              <ion-label>IMC</ion-label>
+            <ion-card-title>{{ item.name }}</ion-card-title>
+            <ion-chip 
+              [style.background]="item.department === 'SCS' ? '#FFD100' : 
+                                item.department === 'IMC' ? '#007A33' : 
+                                item.department === 'PAO' ? '#1DB954' : '#3880ff'"
+              [style.color]="item.department === 'SCS' ? '#212121' : '#fff'"
+              style="margin-left: 8px;"
+            >
+              <ion-label>{{ item.department }}</ion-label>
             </ion-chip>
           </ion-card-header>
           <ion-card-content>
-            <div style="font-weight: bold; color: #888; margin-bottom: 4px;">#234567</div>
-            Stainless steel scissors.
-            <ion-chip color="warning" class="card-badge">
-              <ion-label>Borrowing</ion-label>
+            <div style="font-weight: bold; color: #888; margin-bottom: 4px;">#{{ item.productCode }}</div>
+            {{ item.description }}
+            <ion-chip 
+              [color]="item.status === 'available' ? 'success' : 
+                      item.status === 'borrowed' ? 'warning' : 'danger'" 
+              class="card-badge" 
+              style="margin-bottom: 8px;"
+            >
+              <ion-label>{{ item.status === 'available' ? 'Available' : 
+                          item.status === 'borrowed' ? 'Borrowed' : 'Unavailable' }}</ion-label>
             </ion-chip>
           </ion-card-content>
-          <ion-button fill="clear" color="primary" routerLink="/tabs/item" disabled>Item Unavailable</ion-button>
-        </ion-card>
-      </ion-col>
-      <ion-col size="6" size-md="2.4" *ngIf="departmentFilter === 'all' || departmentFilter === 'PAO'">
-        <ion-card>
-          <img src="assets/items/laptop.png" alt="Laptop" />
-          <ion-card-header class="card-header-badge">
-            <ion-card-title>Laptop</ion-card-title>
-            <ion-chip color="success" style="margin-left: 8px; background: #1DB954; color: #fff;">
-              <ion-label>PAO</ion-label>
-            </ion-chip>
-          </ion-card-header>
-          <ion-card-content>
-            <div style="font-weight: bold; color: #888; margin-bottom: 4px;">#345678</div>
-            Dell Inspiron 15.
-            <ion-chip color="success" class="card-badge" style="margin-bottom: 8px;">
-              <ion-label>Available</ion-label>
-            </ion-chip>
-          </ion-card-content>
-          <ion-button fill="clear" color="primary" routerLink="/tabs/item">Borrow Item</ion-button>
-        </ion-card>
-      </ion-col>
-      <ion-col size="6" size-md="2.4" *ngIf="departmentFilter === 'all' || departmentFilter === 'IMC'">
-        <ion-card>
-          <img src="assets/items/cables.png" alt="Cables" />
-          <ion-card-header class="card-header-badge">
-            <ion-card-title>Ethernet Cables</ion-card-title>
-            <ion-chip color="primary" style="margin-left: 8px; background: #007A33; color: #fff;">
-              <ion-label>IMC</ion-label>
-            </ion-chip>
-          </ion-card-header>
-          <ion-card-content>
-            <div style="font-weight: bold; color: #888; margin-bottom: 4px;">#456789</div>
-            Assorted power and USB cables.
-            <ion-chip color="medium" class="card-badge" style="margin-bottom: 8px;">
-              <ion-label>Unavailable</ion-label>
-            </ion-chip>
-          </ion-card-content>
-          <ion-button fill="clear" color="primary" routerLink="/tabs/item" disabled>Item Unavailable</ion-button>
-        </ion-card>
-      </ion-col>
-      <ion-col size="6" size-md="2.4" *ngIf="departmentFilter === 'all' || departmentFilter === 'SCS'">
-        <ion-card>
-          <img src="assets/items/projector.png" alt="Projector" />
-          <ion-card-header class="card-header-badge">
-            <ion-card-title>Projector</ion-card-title>
-            <ion-chip color="warning" style="margin-left: 8px; background: #FFD100; color: #212121;">
-              <ion-label>SCS</ion-label>
-            </ion-chip>
-          </ion-card-header>
-          <ion-card-content>
-            <div style="font-weight: bold; color: #888; margin-bottom: 4px;">#567890</div>
-            Epson XGA Projector.
-            <ion-chip color="danger" class="card-badge" style="margin-bottom: 8px;">
-              <ion-label>Borrowed</ion-label>
-            </ion-chip>
-          </ion-card-content>
-          <ion-button fill="clear" color="primary" routerLink="/tabs/item" disabled>Item Unavailable</ion-button>
-        </ion-card>
-      </ion-col>
-      <ion-col size="6" size-md="2.4" *ngIf="departmentFilter === 'all' || departmentFilter === 'PAO'">
-        <ion-card>
-          <img src="assets/items/hdmi-adapter.png" alt="HDMI Adapter" />
-          <ion-card-header class="card-header-badge">
-            <ion-card-title>HDMI Adapter</ion-card-title>
-            <ion-chip color="success" style="margin-left: 8px; background: #1DB954; color: #fff;">
-              <ion-label>PAO</ion-label>
-            </ion-chip>
-          </ion-card-header>
-          <ion-card-content>
-            <div style="font-weight: bold; color: #888; margin-bottom: 4px;">#678901</div>
-            HDMI to VGA Adapter.
-            <ion-chip color="success" class="card-badge" style="margin-bottom: 8px;">
-              <ion-label>Available</ion-label>
-            </ion-chip>
-          </ion-card-content>
-          <ion-button fill="clear" color="primary" routerLink="/tabs/item">Borrow Item</ion-button>
+          <ion-button fill="clear" color="primary" [disabled]="item.status !== 'available'">
+            {{ item.status === 'available' ? 'Borrow Item' : 'View Details' }}
+          </ion-button>
         </ion-card>
       </ion-col>
     </ion-row>

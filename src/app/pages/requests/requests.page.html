@@ -1,127 +1,95 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>requests</ion-title>
+    <ion-title>Requests</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">requests</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <ion-refresher slot="fixed" (ionRefresh)="refreshRequests($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
-  <ion-segment [(ngModel)]="requestStatus" value="waiting" color="primary">
+  <!-- Segment filter for approvers -->
+  <ion-segment [(ngModel)]="requestStatus" (ionChange)="onStatusChange(requestStatus)" value="waiting" color="primary" *ngIf="authService.isUserApprover()">
     <ion-segment-button value="waiting">
-      <ion-label>⏳</ion-label>
+      <ion-icon name="hourglass-outline"></ion-icon>
+      <ion-label>Pending</ion-label>
     </ion-segment-button>
     <ion-segment-button value="approved">
-      <ion-label>✅</ion-label>
+      <ion-icon name="checkmark-circle-outline"></ion-icon>
+      <ion-label>Approved</ion-label>
     </ion-segment-button>
-    <ion-segment-button value="not-approved">
-      <ion-label>❌</ion-label>
+    <ion-segment-button value="not_approved">
+      <ion-icon name="close-circle-outline"></ion-icon>
+      <ion-label>Rejected</ion-label>
     </ion-segment-button>
   </ion-segment>
 
-  <ion-list *ngIf="requestStatus === 'approved'">
-    <ion-item button routerLink="/tabs/item">
-      <ion-avatar slot="start">
-        <ion-img src="assets/items/scissors.png" alt="Scissors"></ion-img>
-      </ion-avatar>
-      <ion-label>
-        <h2>
-          Scissors
-          <ion-badge color="primary" style="margin-left:8px;">PAO</ion-badge>
-        </h2>
-        <p>Status: Approved</p>
-        <p>Quantity: 3</p>
-      </ion-label>
-      <ion-badge slot="end" color="danger">Overdue</ion-badge>
-    </ion-item>
-    <ion-item button routerLink="/tabs/item">
-      <ion-avatar slot="start">
-        <ion-img src="assets/items/laptop.png" alt="Laptop"></ion-img>
-      </ion-avatar>
-      <ion-label>
-        <h2>
-          Laptop
-          <ion-badge color="success" style="margin-left:8px;">SCS</ion-badge>
-        </h2>
-        <p>Status: Approved</p>
-        <p>Quantity: 2</p>
-      </ion-label>
-      <ion-badge slot="end" color="success">Borrowed</ion-badge>
-    </ion-item>
-  </ion-list>
+  <!-- Loading spinner -->
+  <div class="ion-text-center ion-padding" *ngIf="isLoading">
+    <ion-spinner name="circles"></ion-spinner>
+    <p>Loading requests...</p>
+  </div>
 
-  <ion-list *ngIf="requestStatus === 'waiting'">
-    <ion-item button routerLink="/tabs/item">
-      <ion-avatar slot="start">
-        <ion-img src="assets/items/monitor.png" alt="Monitor"></ion-img>
-      </ion-avatar>
-      <ion-label>
-        <h2>
-          Monitor
-          <ion-badge color="warning" style="margin-left:8px;">SCS</ion-badge>
-        </h2>
-        <p>Status: Waiting</p>
-        <p>Quantity: 1</p>
-      </ion-label>
-    </ion-item>
-    <ion-item button routerLink="/tabs/item">
-      <ion-avatar slot="start">
-        <ion-img src="assets/items/laptop.png" alt="Laptop 1"></ion-img>
-      </ion-avatar>
-      <ion-label>
-        <h2>
-          Laptop 1
-          <ion-badge color="primary" style="margin-left:8px;">PAO</ion-badge>
-        </h2>
-        <p>Status: Waiting</p>
-        <p>Quantity: 1</p>
-      </ion-label>
-    </ion-item>
-    <ion-item button routerLink="/tabs/item">
-      <ion-avatar slot="start">
-        <ion-img src="assets/items/projector.png" alt="Projector"></ion-img>
-      </ion-avatar>
-      <ion-label>
-        <h2>
-          Projector
-          <ion-badge color="success" style="margin-left:8px;">IMC</ion-badge>
-        </h2>
-        <p>Status: Waiting</p>
-        <p>Quantity: 2</p>
-      </ion-label>
-    </ion-item>
-  </ion-list>
+  <!-- No requests message -->
+  <div class="ion-text-center ion-padding" *ngIf="!isLoading && filteredRequests.length === 0">
+    <ion-icon name="document-text-outline" size="large" color="medium"></ion-icon>
+    <h4>No Requests Found</h4>
+    <p *ngIf="authService.isUserApprover()">There are no {{ getStatusText(requestStatus).toLowerCase() }} requests at this time.</p>
+    <p *ngIf="!authService.isUserApprover()">You haven't made any requests yet.</p>
+    <ion-button routerLink="/tabs/home" expand="block" fill="outline">
+      Browse Items to Borrow
+    </ion-button>
+  </div>
 
-  <ion-list *ngIf="requestStatus === 'not-approved'">
-    <ion-item button routerLink="/tabs/item">
-      <ion-avatar slot="start">
-        <ion-img src="assets/items/laptop.png" alt="Laptop 2"></ion-img>
-      </ion-avatar>
+  <!-- Request list -->
+  <ion-list *ngIf="!isLoading && filteredRequests.length > 0">
+    <ion-list-header>
       <ion-label>
-        <h2>
-          Laptop 2
-          <ion-badge color="success" style="margin-left:8px;">SCS</ion-badge>
-        </h2>
-        <p>Status: Not Approved</p>
-        <p>Quantity: 1</p>
+        {{ filteredRequests.length }} {{ filteredRequests.length === 1 ? 'Request' : 'Requests' }}
       </ion-label>
-    </ion-item>
-    <ion-item button routerLink="/tabs/item">
-      <ion-avatar slot="start">
-        <ion-img src="assets/items/scissors.png" alt="Scissors"></ion-img>
-      </ion-avatar>
-      <ion-label>
-        <h2>
-          Scissors
-          <ion-badge color="primary" style="margin-left:8px;">PAO</ion-badge>
-        </h2>
-        <p>Status: Not Approved</p>
-        <p>Quantity: 2</p>
-      </ion-label>
-    </ion-item>
+    </ion-list-header>
+
+    <ion-item-sliding *ngFor="let request of filteredRequests">
+      <ion-item button (click)="viewRequestDetails(request)">
+        <ion-avatar slot="start">
+          <ion-img [src]="request.itemImage || 'assets/items/default-item.png'" [alt]="request.itemName"></ion-img>
+        </ion-avatar>
+        <ion-label>
+          <h2>
+            {{ request.itemName }}
+            <ion-badge 
+              [color]="request.department === 'SCS' ? 'warning' : 
+                      request.department === 'IMC' ? 'primary' : 
+                      request.department === 'PAO' ? 'success' : 'tertiary'" 
+              style="margin-left:8px;"
+            >
+              {{ request.department }}
+            </ion-badge>
+          </h2>
+          <p>Status: <ion-text [color]="getStatusColor(request.status)">{{ getStatusText(request.status) }}</ion-text></p>
+          <p>Event: {{ request.eventName }}</p>
+          <p>Request Date: {{ formatDate(request.requestDate) }}</p>
+        </ion-label>
+        <ion-badge slot="end" [color]="getStatusColor(request.status)">{{ getStatusText(request.status) }}</ion-badge>
+      </ion-item>
+
+      <!-- Slide options for user (can cancel if pending) -->
+      <ion-item-options side="end" *ngIf="!authService.isUserApprover() && request.status === 'waiting'">
+        <ion-item-option color="danger" (click)="cancelRequest(request)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+
+      <!-- Slide options for approver -->
+      <ion-item-options side="end" *ngIf="authService.isUserApprover() && request.status === 'waiting'">
+        <ion-item-option color="success">
+          <ion-icon slot="icon-only" name="checkmark-outline"></ion-icon>
+        </ion-item-option>
+        <ion-item-option color="danger">
+          <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
   </ion-list>
 </ion-content>
