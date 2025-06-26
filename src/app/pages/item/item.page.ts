@@ -23,7 +23,7 @@ export class ItemPage implements OnInit {
     email: 'demo@josenian.edu',
     displayName: 'Demo User',
     role: 'student',
-    department: 'IT',
+    department: 'IMC',
     studentId: 'DEMO-123'
   };
   
@@ -81,7 +81,7 @@ export class ItemPage implements OnInit {
       }
     } catch (error) {
       console.error('Error loading item:', error);
-      this.showAlert('Error', 'Failed to load item details');
+      // this.showAlert('Error', 'Failed to load item details');
     } finally {
       this.isLoading = false;
     }

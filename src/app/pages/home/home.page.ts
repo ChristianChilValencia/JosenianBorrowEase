@@ -54,7 +54,7 @@ export class HomePage implements OnInit, OnDestroy {
       this.filterItems();
     } catch (error) {
       console.error('Error loading items:', error);
-      this.showToast('Failed to load items. Please try again.');
+      // this.showToast('Failed to load items. Please try again.');
     } finally {
       this.isLoading = false;
     }
@@ -96,7 +96,7 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   viewItem(item: Item) {
-    this.router.navigate(['/item', item.id]);
+    this.router.navigate(['/tabs/item', item.id]);
   }
 
   async refreshItems(event: any) {

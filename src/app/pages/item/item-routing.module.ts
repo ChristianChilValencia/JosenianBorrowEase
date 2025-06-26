@@ -5,6 +5,10 @@ import { ItemPage } from './item.page';
 
 const routes: Routes = [
   {
+    path: ':id',
+    component: ItemPage
+  },
+  {
     path: '',
     component: ItemPage
   }

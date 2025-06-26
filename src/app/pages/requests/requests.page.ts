@@ -23,7 +23,7 @@ export class RequestsPage implements OnInit, OnDestroy {
     email: 'demo@josenian.edu',
     displayName: 'Demo User',
     role: 'approver',
-    department: 'IT',
+    department: 'IMC',
     studentId: 'DEMO-123'
   };
   
@@ -70,7 +70,7 @@ export class RequestsPage implements OnInit, OnDestroy {
       await this.requestService.getAllRequests();
     } catch (error) {
       console.error('Error loading requests:', error);
-      this.showToast('Failed to load requests. Please try again.');
+      // this.showToast('Failed to load requests. Please try again.');
     } finally {
       this.isLoading = false;
     }

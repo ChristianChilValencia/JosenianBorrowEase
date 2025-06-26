@@ -39,7 +39,7 @@ export class Tab2Page implements OnInit {
     } catch (error) {
       console.error('Error loading contacts:', error);
       const toast = await this.toastController.create({
-        message: 'Failed to load contacts. Please try again.',
+        // message: 'Failed to load contacts. Please try again.',
         duration: 2000,
         color: 'danger'
       });

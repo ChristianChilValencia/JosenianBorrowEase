@@ -19,6 +19,7 @@ export class ApproverPage implements OnInit, OnDestroy {
   
   pendingRequests: BorrowRequest[] = [];
   items: Item[] = [];
+  filteredItems: Item[] = []; // For the search functionality in Manage Items
   
   // Demo user for single-user mode
   user: User = {
@@ -26,7 +27,7 @@ export class ApproverPage implements OnInit, OnDestroy {
     email: 'demo@josenian.edu',
     displayName: 'Demo User',
     role: 'approver',
-    department: 'IT'
+    department: 'IMC'
   };
   
   isLoading: boolean = false;
@@ -81,6 +82,7 @@ export class ApproverPage implements OnInit, OnDestroy {
     this.user = this.authService.getCurrentUser();
   }
 
+  // Setup subscriptions for items and requests
   private setupSubscriptions() {
     this.requestsSubscription = this.requestService.requests$.subscribe(requests => {
       this.pendingRequests = requests.filter(req => req.status === 'waiting');
@@ -88,6 +90,7 @@ export class ApproverPage implements OnInit, OnDestroy {
     
     this.itemsSubscription = this.itemService.items$.subscribe(items => {
       this.items = items;
+      this.filteredItems = [...items]; // Initialize filtered items with all items
     });
   }
 
@@ -100,7 +103,7 @@ export class ApproverPage implements OnInit, OnDestroy {
       ]);
     } catch (error) {
       console.error('Error loading data:', error);
-      this.showToast('Failed to load data. Please try again.');
+      // this.showToast('Failed to load data. Please try again.');
     } finally {
       this.isLoading = false;
     }
@@ -287,6 +290,196 @@ export class ApproverPage implements OnInit, OnDestroy {
               return false;
             } finally {
               loading.dismiss();
+            }
+          }
+        }
+      ]
+    });
+    
+    await alert.present();
+  }
+
+  // Search items in Manage Items tab
+  searchItems(event: any) {
+    const searchTerm = event.detail.value.toLowerCase();
+    
+    if (!searchTerm) {
+      this.filteredItems = [...this.items];
+      return;
+    }
+    
+    this.filteredItems = this.items.filter(item => 
+      item.name.toLowerCase().includes(searchTerm) ||
+      item.description.toLowerCase().includes(searchTerm) ||
+      item.productCode.toLowerCase().includes(searchTerm) ||
+      item.department.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  // Edit an item
+  async editItem(item: Item) {
+    const alert = await this.alertController.create({
+      header: 'Edit Item',
+      inputs: [
+        {
+          name: 'name',
+          type: 'text',
+          value: item.name,
+          placeholder: 'Item Name',
+          label: 'Name'
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          value: item.description,
+          placeholder: 'Description',
+          label: 'Description'
+        },
+        {
+          name: 'productCode',
+          type: 'text',
+          value: item.productCode,
+          placeholder: 'Product Code',
+          label: 'Product Code'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Save',
+          handler: async (data) => {
+            // Show another alert for selecting department and status (since ionic alert inputs don't support select)
+            const selectAlert = await this.alertController.create({
+              header: 'Department & Status',
+              inputs: [
+                {
+                  name: 'department',
+                  type: 'radio',
+                  label: 'IMC',
+                  value: 'IMC',
+                  checked: item.department === 'IMC'
+                },
+                {
+                  name: 'department',
+                  type: 'radio',
+                  label: 'SCS',
+                  value: 'SCS',
+                  checked: item.department === 'SCS'
+                },
+                {
+                  name: 'department',
+                  type: 'radio',
+                  label: 'PAO',
+                  value: 'PAO',
+                  checked: item.department === 'PAO'
+                },
+                {
+                  name: 'status',
+                  type: 'radio',
+                  label: 'Available',
+                  value: 'available',
+                  checked: item.status === 'available'
+                },
+                {
+                  name: 'status',
+                  type: 'radio',
+                  label: 'In Use',
+                  value: 'in_use',
+                  checked: item.status === 'in_use'
+                },
+                {
+                  name: 'status',
+                  type: 'radio',
+                  label: 'Maintenance',
+                  value: 'maintenance',
+                  checked: item.status === 'maintenance'
+                },
+                {
+                  name: 'status',
+                  type: 'radio',
+                  label: 'Reserved',
+                  value: 'reserved',
+                  checked: item.status === 'reserved'
+                }
+              ],
+              buttons: [
+                {
+                  text: 'Cancel',
+                  role: 'cancel'
+                },
+                {
+                  text: 'Update Item',
+                  handler: async (selectData) => {
+                    const loading = await this.loadingController.create({
+                      message: 'Saving changes...'
+                    });
+                    await loading.present();
+                    
+                    try {
+                      // Update the item with new values
+                      const updatedItem: Item = {
+                        ...item,
+                        name: data.name,
+                        description: data.description,
+                        productCode: data.productCode,
+                        department: selectData.department,
+                        status: selectData.status as any // Type assertion to match the enum type
+                      };
+                      
+                      await this.itemService.updateItem(item.id!, updatedItem);
+                      
+                      this.showToast('Item updated successfully');
+                      loading.dismiss();
+                    } catch (error) {
+                      console.error('Error updating item:', error);
+                      loading.dismiss();
+                      this.showAlert('Error', 'Failed to update the item. Please try again.');
+                    }
+                  }
+                }
+              ]
+            });
+            
+            await selectAlert.present();
+            return false; // Prevent the first alert from closing automatically
+          }
+        }
+      ]
+    });
+    
+    await alert.present();
+  }
+
+  // Delete an item
+  async deleteItem(item: Item) {
+    const alert = await this.alertController.create({
+      header: 'Confirm Deletion',
+      message: `Are you sure you want to delete the item "${item.name}"?`,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Delete',
+          handler: async () => {
+            const loading = await this.loadingController.create({
+              message: 'Deleting item...'
+            });
+            await loading.present();
+            
+            try {
+              await this.itemService.deleteItem(item.id!);
+              
+              this.showToast('Item deleted successfully');
+              loading.dismiss();
+            } catch (error) {
+              console.error('Error deleting item:', error);
+              loading.dismiss();
+              this.showAlert('Error', 'Failed to delete the item. Please try again.');
             }
           }
         }
