@@ -6,6 +6,11 @@
       </ion-button>
     </ion-buttons>
     <ion-title>{{ item?.name || 'Item Details' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/tabs/approver">
+        <ion-icon name="person-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -73,19 +78,13 @@
 
           <ion-item>
             <ion-label position="stacked">Event Date</ion-label>
-            <ion-datetime-button datetime="eventDatetime"></ion-datetime-button>
-            <ion-modal [keepContentsMounted]="true">
-              <ng-template>
-                <ion-datetime 
-                  id="eventDatetime" 
-                  formControlName="eventDate" 
-                  [(ngModel)]="eventDate"
-                  (ionChange)="updateDateLabel()"
-                  presentation="date-time" 
-                  [min]="getMinDate()"
-                ></ion-datetime>
-              </ng-template>
-            </ion-modal>
+            <ion-input 
+              formControlName="eventDate" 
+              (click)="openEventDateCalendar()" 
+              readonly
+              placeholder="Select event date"
+              [value]="formatDateForDisplay(eventDate)"
+            ></ion-input>
           </ion-item>
           <ion-text color="danger" *ngIf="borrowRequestForm.get('eventDate')?.hasError('required') && borrowRequestForm.get('eventDate')?.touched">
             <p class="error-message">Event date is required</p>
@@ -93,19 +92,13 @@
 
           <ion-item>
             <ion-label position="stacked">Return Date</ion-label>
-            <ion-datetime-button datetime="returnDatetime"></ion-datetime-button>
-            <ion-modal [keepContentsMounted]="true">
-              <ng-template>
-                <ion-datetime 
-                  id="returnDatetime" 
-                  formControlName="returnDate" 
-                  [(ngModel)]="returnDate"
-                  (ionChange)="updateDateLabel()"
-                  presentation="date-time" 
-                  [min]="getMinReturnDate()"
-                ></ion-datetime>
-              </ng-template>
-            </ion-modal>
+            <ion-input 
+              formControlName="returnDate" 
+              (click)="openReturnDateCalendar()"
+              readonly
+              placeholder="Select return date"
+              [value]="formatDateForDisplay(returnDate)"
+            ></ion-input>
           </ion-item>
           <ion-text color="danger" *ngIf="borrowRequestForm.get('returnDate')?.hasError('required') && borrowRequestForm.get('returnDate')?.touched">
             <p class="error-message">Return date is required</p>

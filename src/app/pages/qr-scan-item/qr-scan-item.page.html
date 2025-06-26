@@ -1,6 +1,11 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>Scan QR Code</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/tabs/approver">
+        <ion-icon name="person-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -14,7 +19,7 @@
   <div style="display: flex; flex-direction: column; align-items: center; margin-top: 48px;">
     <div 
       style="position: relative; width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; cursor: pointer;"
-      routerLink="/tabs/item"
+      routerLink="/tabs/approver"
     >
       <ion-icon name="scan-outline" style="font-size: 180px; color: #3880ff; position: absolute; left: 0; top: 0;"></ion-icon>
       <img src="assets/items/qr.png" alt="QR" style="width: 90px; height: 90px; position: absolute; left: 45px; top: 45px;" />

@@ -5,6 +5,13 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
+  <!-- FAB button for adding items - only visible in manage items segment -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="segmentValue === 'manageItems'">
+    <ion-fab-button (click)="showAddItemPrompt()" color="primary">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
   <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">Approver Dashboard</ion-title>
@@ -30,7 +37,6 @@
 
     <!-- Pending Requests View -->
     <div *ngIf="segmentValue === 'pendingRequests' && !isLoading">
-      <h2>Pending Approval Requests</h2>
       
       <ion-list *ngIf="pendingRequests.length > 0">
         <ion-item *ngFor="let request of pendingRequests">
@@ -52,6 +58,7 @@
                     <p><strong>Purpose:</strong> {{ request.purpose || request.reason }}</p>
                     <p><strong>Department:</strong> {{ request.department }}</p>
                     <p><strong>Requested:</strong> {{ formatDate(request.requestDate) }}</p>
+                    <p><strong>Event Date:</strong> {{ formatDate(request.eventDate) }}</p>
                     <p><strong>Return by:</strong> {{ formatDate(request.returnDate) }}</p>
                     <p><strong>Item Code:</strong> {{ request.itemCode || request.itemId }}</p>
                     <p><strong>Status:</strong> 
@@ -88,15 +95,10 @@
     </div>
 
     <!-- Manage Items View -->
-    <div *ngIf="segmentValue === 'manageItems' && !isLoading">
-      <h2>Manage Items</h2>
-      
+    <div *ngIf="segmentValue === 'manageItems' && !isLoading">      
       <div class="ion-padding-horizontal">
         <ion-item lines="none">
           <ion-searchbar placeholder="Search items" (ionChange)="searchItems($event)" animated></ion-searchbar>
-          <ion-button fill="clear" slot="end" (click)="showAddItemPrompt()">
-            <ion-icon slot="icon-only" name="add-circle-outline" size="large"></ion-icon>
-          </ion-button>
         </ion-item>
       </div>
       

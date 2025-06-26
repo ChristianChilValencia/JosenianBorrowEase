@@ -20,6 +20,20 @@ ion-item {
   }
 }
 
+// Style for FAB button
+ion-fab {
+  margin-bottom: 16px;
+  margin-right: 16px;
+  
+  ion-fab-button {
+    --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+}
+
 // Style for item thumbnails
 .item-thumbnail {
   width: 80px;

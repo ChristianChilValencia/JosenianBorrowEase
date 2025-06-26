@@ -1,6 +1,11 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>home</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/tabs/approver">
+        <ion-icon name="person-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
   <ion-searchbar placeholder="Search for an item to borrow" debounce="500" (ionChange)="onSearch($event)" [(ngModel)]="searchTerm"></ion-searchbar>
     <div class="chip-segment-scroll">

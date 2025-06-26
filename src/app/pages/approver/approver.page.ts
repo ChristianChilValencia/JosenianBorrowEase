@@ -808,10 +808,10 @@ export class ApproverPage implements OnInit, OnDestroy {
 
               const updatedRequest = {
                 ...request,
-                status: 'rejected' as const,
-                rejectedBy: this.user.email,
-                rejectionDate: new Date(),
-                rejectionReason: data.reason || 'No reason provided'
+                status: 'not_approved' as const,
+                approvedBy: this.user.email,
+                approvalDate: new Date(),
+                notes: data.reason || 'No reason provided'
               };
               
               await this.requestService.updateRequest(request.id, updatedRequest);

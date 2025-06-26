@@ -1,6 +1,11 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>Requests</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/tabs/approver">
+        <ion-icon name="person-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -69,7 +74,21 @@
           </h2>
           <p>Status: <ion-text [color]="getStatusColor(request.status)">{{ getStatusText(request.status) }}</ion-text></p>
           <p>Event: {{ request.eventName }}</p>
-          <p>Request Date: {{ formatDate(request.requestDate) }}</p>
+          <p>
+            {{ request.status === 'waiting' ? 'Request Date: ' : 
+               request.status === 'approved' ? 'Approved on: ' : 
+               request.status === 'not_approved' ? 'Rejected on: ' : 'Return Date: ' }}
+            {{ request.status === 'waiting' ? formatDate(request.requestDate) :
+               request.status === 'approved' ? formatDate(request.approvalDate || request.requestDate) : 
+               request.status === 'not_approved' ? formatDate(request.approvalDate || request.requestDate) : 
+               formatDate(request.returnDate) }}
+          </p>
+          <p *ngIf="request.status === 'approved' || request.status === 'not_approved'">
+            <ion-text [color]="request.status === 'approved' ? 'success' : 'danger'">
+              {{ request.status === 'approved' ? 'Event Date: ' : 'Reason: ' }}
+              {{ request.status === 'approved' ? formatDate(request.eventDate) : (request.notes || 'No reason provided') }}
+            </ion-text>
+          </p>
         </ion-label>
         <ion-badge slot="end" [color]="getStatusColor(request.status)">{{ getStatusText(request.status) }}</ion-badge>
       </ion-item>

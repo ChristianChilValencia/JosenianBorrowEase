@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AlertController, LoadingController, ToastController } from '@ionic/angular';
+import { AlertController, LoadingController, ToastController, ModalController } from '@ionic/angular';
 import { ItemService } from '../../services/item.service';
 import { RequestService } from '../../services/request.service';
 import { AuthService } from '../../services/auth.service';
@@ -88,28 +88,42 @@ export class ItemPage implements OnInit {
   }
 
   updateDateLabel() {
-    if (this.eventDate && this.returnDate) {
-      this.dateLabel = `Event: ${this.formatDate(this.eventDate)} until Return: ${this.formatDate(this.returnDate)}`;
-    } else if (this.eventDate) {
-      this.dateLabel = `Event: ${this.formatDate(this.eventDate)}`;
-    } else if (this.returnDate) {
-      this.dateLabel = `Return: ${this.formatDate(this.returnDate)}`;
-    } else {
+    try {
+      if (this.eventDate && this.returnDate) {
+        this.dateLabel = `Event: ${this.formatDate(this.eventDate)} until Return: ${this.formatDate(this.returnDate)}`;
+      } else if (this.eventDate) {
+        this.dateLabel = `Event: ${this.formatDate(this.eventDate)}`;
+      } else if (this.returnDate) {
+        this.dateLabel = `Return: ${this.formatDate(this.returnDate)}`;
+      } else {
+        this.dateLabel = '';
+      }
+    } catch (error) {
+      console.error('Error updating date label:', error);
       this.dateLabel = '';
     }
   }
 
   formatDate(dateStr: string): string {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) {
+        console.error('Invalid date:', dateStr);
+        return 'Invalid date';
+      }
+      return date.toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Error formatting date';
+    }
   }
 
   async submitBorrowRequest() {
@@ -212,10 +226,180 @@ export class ItemPage implements OnInit {
 
   // Methods for template usage
   getMinDate(): string {
-    return new Date().toISOString();
+    const today = new Date();
+    return today.toISOString();
   }
   
   getMinReturnDate(): string {
-    return this.eventDate || new Date().toISOString();
+    if (this.eventDate) {
+      const eventDate = new Date(this.eventDate);
+      // Add 1 hour to event date as minimum return time
+      eventDate.setHours(eventDate.getHours() + 1);
+      return eventDate.toISOString();
+    }
+    return new Date().toISOString();
+  }
+
+  // Calendar methods
+  async openEventDateCalendar() {
+    const alert = await this.alertController.create({
+      header: 'Select Event Date',
+      cssClass: 'calendar-alert',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Set Date & Time',
+          handler: (data) => {
+            if (data && data.date) {
+              // Handle date selection
+              const selectedDate = new Date(data.date);
+              
+              // Now prompt for time
+              this.promptForTime(selectedDate, 'event');
+            }
+          }
+        }
+      ],
+      inputs: [
+        {
+          type: 'date',
+          name: 'date',
+          min: this.getMinDate().split('T')[0], // Get just the date part
+          placeholder: 'YYYY-MM-DD'
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async openReturnDateCalendar() {
+    // Ensure event date is set first
+    if (!this.eventDate) {
+      this.showAlert('Event Date Required', 'Please select an event date first before selecting a return date.');
+      return;
+    }
+    
+    const minDate = new Date(this.eventDate);
+    const minDateString = minDate.toISOString().split('T')[0];
+
+    const alert = await this.alertController.create({
+      header: 'Select Return Date',
+      cssClass: 'calendar-alert',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Set Date & Time',
+          handler: (data) => {
+            if (data && data.date) {
+              // Handle date selection
+              const selectedDate = new Date(data.date);
+              
+              // Ensure selected date is after event date
+              const eventDate = new Date(this.eventDate);
+              if (selectedDate.toDateString() === eventDate.toDateString()) {
+                // Same day - make sure time will be after event time
+                selectedDate.setHours(eventDate.getHours() + 1, eventDate.getMinutes());
+              }
+              
+              // Now prompt for time
+              this.promptForTime(selectedDate, 'return');
+            }
+          }
+        }
+      ],
+      inputs: [
+        {
+          type: 'date',
+          name: 'date',
+          min: minDateString,
+          placeholder: 'YYYY-MM-DD'
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async promptForTime(date: Date, type: 'event' | 'return') {
+    const currentHours = new Date().getHours().toString().padStart(2, '0');
+    const currentMinutes = new Date().getMinutes().toString().padStart(2, '0');
+    const defaultTime = `${currentHours}:${currentMinutes}`;
+
+    const alert = await this.alertController.create({
+      header: `Select ${type === 'event' ? 'Event' : 'Return'} Time`,
+      inputs: [
+        {
+          type: 'time',
+          name: 'time',
+          value: defaultTime
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Confirm',
+          handler: (data) => {
+            if (data && data.time) {
+              try {
+                const [hours, minutes] = data.time.split(':');
+                date.setHours(parseInt(hours, 10), parseInt(minutes, 10));
+                
+                const isoString = date.toISOString();
+                
+                // Update the appropriate date
+                if (type === 'event') {
+                  this.eventDate = isoString;
+                  this.borrowRequestForm.get('eventDate')?.setValue(isoString);
+                  
+                  // If return date is set and now before event date, clear it
+                  if (this.returnDate) {
+                    const returnDate = new Date(this.returnDate);
+                    if (returnDate < date) {
+                      this.returnDate = '';
+                      this.borrowRequestForm.get('returnDate')?.setValue('');
+                      this.showToast('Return date reset as it was before the new event date');
+                    }
+                  }
+                } else {
+                  this.returnDate = isoString;
+                  this.borrowRequestForm.get('returnDate')?.setValue(isoString);
+                }
+                
+                // Update the date label
+                this.updateDateLabel();
+              } catch (error) {
+                console.error('Error setting time:', error);
+                this.showToast('Error setting time. Please try again.');
+              }
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  formatDateForDisplay(dateStr: string): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
   }
 }

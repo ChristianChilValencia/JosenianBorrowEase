@@ -102,19 +102,47 @@ export class RequestsPage implements OnInit, OnDestroy {
   }
 
   async viewRequestDetails(request: BorrowRequest) {
-    const alert = await this.alertController.create({
-      header: request.itemName,
-      subHeader: `Status: ${this.getStatusText(request.status)}`,
-      message: `
-        <p><strong>Event:</strong> ${request.eventName}</p>
-        <p><strong>Reason:</strong> ${request.reason}</p>
-        <p><strong>Request Date:</strong> ${this.formatDate(request.requestDate)}</p>
+    // Base details that appear for all request types
+    let message = `
+      <p><strong>Event:</strong> ${request.eventName}</p>
+      <p><strong>Reason:</strong> ${request.reason}</p>
+      <p><strong>Request Date:</strong> ${this.formatDate(request.requestDate)}</p>
+    `;
+    
+    // Add status-specific details
+    if (request.status === 'waiting') {
+      message += `
+        <p><strong>Event Date:</strong> ${this.formatDate(request.eventDate)}</p>
+        <p><strong>Return Date:</strong> ${this.formatDate(request.returnDate)}</p>
+      `;
+    } else if (request.status === 'approved') {
+      message += `
+        <p><strong>Event Date:</strong> ${this.formatDate(request.eventDate)}</p>
+        <p><strong>Return Date:</strong> ${this.formatDate(request.returnDate)}</p>
+        <p><strong>Approved By:</strong> ${request.approvedBy || 'Unknown'}</p>
+        <p><strong>Approval Date:</strong> ${this.formatDate(request.approvalDate)}</p>
+        ${request.notes ? `<p><strong>Notes:</strong> ${request.notes}</p>` : ''}
+      `;
+    } else if (request.status === 'not_approved') {
+      message += `
+        <p><strong>Rejected By:</strong> ${request.approvedBy || 'Unknown'}</p>
+        <p><strong>Rejection Date:</strong> ${this.formatDate(request.approvalDate)}</p>
+        <p><strong>Reason for Rejection:</strong> ${request.notes || 'No reason provided'}</p>
+      `;
+    } else {
+      message += `
         <p><strong>Event Date:</strong> ${this.formatDate(request.eventDate)}</p>
         <p><strong>Return Date:</strong> ${this.formatDate(request.returnDate)}</p>
         ${request.approvedBy ? `<p><strong>Approved By:</strong> ${request.approvedBy}</p>` : ''}
         ${request.approvalDate ? `<p><strong>Approval Date:</strong> ${this.formatDate(request.approvalDate)}</p>` : ''}
         ${request.notes ? `<p><strong>Notes:</strong> ${request.notes}</p>` : ''}
-      `,
+      `;
+    }
+    
+    const alert = await this.alertController.create({
+      header: request.itemName,
+      subHeader: `Status: ${this.getStatusText(request.status)}`,
+      message: message,
       buttons: ['Close']
     });
     
@@ -190,6 +218,38 @@ export class RequestsPage implements OnInit, OnDestroy {
       case 'not_approved': return 'danger';
       case 'returned': return 'medium';
       default: return 'primary';
+    }
+  }
+
+  // Helper function to get date display based on status
+  getDateDisplay(request: BorrowRequest): string {
+    switch (request.status) {
+      case 'waiting':
+        return `Request Date: ${this.formatDate(request.requestDate)}`;
+      case 'approved':
+        return `Approved on: ${this.formatDate(request.approvalDate || request.requestDate)}`;
+      case 'not_approved':
+        return `Rejected on: ${this.formatDate(request.approvalDate || request.requestDate)}`;
+      case 'returned':
+        return `Returned on: ${this.formatDate(request.returnDate)}`;
+      default:
+        return `Request Date: ${this.formatDate(request.requestDate)}`;
+    }
+  }
+
+  // Helper function to get relevant secondary date based on status
+  getSecondaryDateDisplay(request: BorrowRequest): string {
+    switch (request.status) {
+      case 'waiting':
+        return `Event Date: ${this.formatDate(request.eventDate)}`;
+      case 'approved':
+        return `Event Date: ${this.formatDate(request.eventDate)}`;
+      case 'not_approved':
+        return '';  // No secondary date for rejected requests
+      case 'returned':
+        return `Event was on: ${this.formatDate(request.eventDate)}`;
+      default:
+        return '';
     }
   }
 
