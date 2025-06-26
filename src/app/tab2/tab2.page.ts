@@ -3,7 +3,7 @@ import { ContactService } from '../services/contact.service';
 import { AlertController, ToastController, ModalController } from '@ionic/angular';
 import { Contact } from '../models/contact.model';
 // Make sure to import the standalone component
-import { EditContactComponent } from '../components/edit-contact/edit-contact.component';
+// import { EditContactComponent } from '../components/edit-contact/edit-contact.component';
 
 @Component({
   selector: 'app-tab2',
@@ -134,7 +134,7 @@ export class Tab2Page implements OnInit {
       event.target.complete();
     }
   }
-
+EditContactComponent: any;
   async openEditContact(contact: Contact) {
     if (!contact.id) {
       console.error('Contact ID is missing');
@@ -142,7 +142,7 @@ export class Tab2Page implements OnInit {
     }
     
     const modal = await this.modalController.create({
-      component: EditContactComponent,
+      component: this.EditContactComponent,
       componentProps: {
         contactId: contact.id
       },

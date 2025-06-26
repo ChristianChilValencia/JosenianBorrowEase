@@ -157,7 +157,7 @@ export class RequestService {
         if (error.code === 'failed-precondition' && error.message.includes('index')) {
           console.error('Firestore index is missing:', error);
           
-          // Extract the index creation URL from the error message if available
+          // Extract the index creation URL from the error.message if available
           const urlMatch = error.message.match(/https:\/\/console\.firebase\.google\.com[^\s"')]+/);
           if (urlMatch && urlMatch[0]) {
             console.warn('Create the missing index here:', urlMatch[0]);
@@ -248,6 +248,27 @@ export class RequestService {
       }
     } catch (error) {
       console.error(`Error updating request status for ID ${id}:`, error);
+      throw error;
+    }
+  }
+
+  // Update a request by ID
+  async updateRequest(requestId: string, updatedData: Partial<BorrowRequest>): Promise<void> {
+    try {
+      const requestRef = doc(this.firestore, this.requestsCollection, requestId);
+      await updateDoc(requestRef, { ...updatedData });
+
+      // If the request is approved or rejected, update the item status
+      if (updatedData.status === 'approved' || updatedData.status === 'rejected') {
+        const request = await this.getRequest(requestId);
+        if (request?.itemId) {
+          await this.itemService.updateItem(request.itemId, {
+            status: updatedData.status === 'approved' ? 'borrowed' : 'available'
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error updating request:', error);
       throw error;
     }
   }

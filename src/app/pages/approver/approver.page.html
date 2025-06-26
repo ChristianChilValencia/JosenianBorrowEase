@@ -17,9 +17,6 @@
       <ion-segment-button value="pendingRequests">
         <ion-label>Pending Requests</ion-label>
       </ion-segment-button>
-      <ion-segment-button value="addItem">
-        <ion-label>Add New Item</ion-label>
-      </ion-segment-button>
       <ion-segment-button value="manageItems">
         <ion-label>Manage Items</ion-label>
       </ion-segment-button>
@@ -47,7 +44,8 @@
               <ion-grid>
                 <ion-row>
                   <ion-col size="4">
-<img [src]="getRequestImage(request) || 'assets/items/default-item.png'" alt="{{ request.itemName }}" style="max-width: 100px; max-height: 100px; border-radius: 8px; margin-bottom: 8px;">                  </ion-col>
+                    <img [src]="request.itemImage || 'assets/items/default-item.png'" alt="{{ request.itemName }}" style="max-width: 100px; max-height: 100px; border-radius: 8px; margin-bottom: 8px;">
+                  </ion-col>
                   <ion-col size="8">
                     <p><strong>Requested by:</strong> {{ request.requesterName }}</p>
                     <p><strong>Email:</strong> {{ request.requesterEmail }}</p>
@@ -89,128 +87,49 @@
       </div>
     </div>
 
-    <!-- Add Item View -->
-    <div *ngIf="segmentValue === 'addItem' && !isLoading">
-      <h2>Add New Item</h2>
-      
-      <form [formGroup]="itemForm" (ngSubmit)="submitItemForm()">
-        <ion-item>
-          <ion-label position="stacked">Item Name</ion-label>
-          <ion-input formControlName="name" type="text" placeholder="Enter item name"></ion-input>
-          <ion-note slot="error" *ngIf="itemForm.get('name')?.invalid && itemForm.get('name')?.touched">
-            Name is required
-          </ion-note>
-        </ion-item>
-        
-        <ion-item>
-          <ion-label position="stacked">Description</ion-label>
-          <ion-textarea formControlName="description" rows="3" placeholder="Enter item description"></ion-textarea>
-          <ion-note slot="error" *ngIf="itemForm.get('description')?.invalid && itemForm.get('description')?.touched">
-            Description is required
-          </ion-note>
-        </ion-item>
-        
-        <ion-item>
-          <ion-label position="stacked">Department</ion-label>
-          <ion-select formControlName="department" placeholder="Select department">
-            <ion-select-option value="IMC">IMC</ion-select-option>
-            <ion-select-option value="SCS">SCS</ion-select-option>
-            <ion-select-option value="PAO">PAO</ion-select-option>
-          </ion-select>
-          <ion-note slot="error" *ngIf="itemForm.get('department')?.invalid && itemForm.get('department')?.touched">
-            Department is required
-          </ion-note>
-        </ion-item>
-        
-        <ion-item>
-          <ion-label position="stacked">Product Code</ion-label>
-          <ion-input formControlName="productCode" type="text" placeholder="Enter product code"></ion-input>
-          <ion-note slot="error" *ngIf="itemForm.get('productCode')?.invalid && itemForm.get('productCode')?.touched">
-            Product code is required
-          </ion-note>
-        </ion-item>
-        
-        <ion-item>
-          <ion-label position="stacked">Status</ion-label>
-          <ion-select formControlName="status" placeholder="Select status">
-            <ion-select-option value="available">Available</ion-select-option>
-            <ion-select-option value="in_use">In Use</ion-select-option>
-            <ion-select-option value="maintenance">Maintenance</ion-select-option>
-            <ion-select-option value="reserved">Reserved</ion-select-option>
-          </ion-select>
-          <ion-note slot="error" *ngIf="itemForm.get('status')?.invalid && itemForm.get('status')?.touched">
-            Status is required
-          </ion-note>
-        </ion-item>
-        
-        <ion-item>
-          <ion-label position="stacked">Item Image</ion-label>
-          <ion-select formControlName="image" placeholder="Select an image">
-            <ion-select-option *ngFor="let img of imageOptions" [value]="img">
-              {{ img.split('/').pop() }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-        
-        <!-- Image preview -->
-        <div *ngIf="itemForm.get('image')?.value" class="ion-padding">
-          <h4>Image Preview</h4>
-          <img [src]="itemForm.get('image')?.value" style="max-width: 100%; max-height: 200px;">
-        </div>
-        
-        <div class="ion-padding">
-          <ion-button expand="block" type="submit" [disabled]="!itemForm.valid || isSubmitting">
-            <ion-icon name="add-circle-outline" slot="start"></ion-icon>
-            Add Item
-          </ion-button>
-        </div>
-      </form>
-    </div>
-
     <!-- Manage Items View -->
     <div *ngIf="segmentValue === 'manageItems' && !isLoading">
-      <h2>Manage Existing Items</h2>
+      <h2>Manage Items</h2>
       
-      <ion-searchbar placeholder="Search items" (ionChange)="searchItems($event)" animated></ion-searchbar>
+      <div class="ion-padding-horizontal">
+        <ion-item lines="none">
+          <ion-searchbar placeholder="Search items" (ionChange)="searchItems($event)" animated></ion-searchbar>
+          <ion-button fill="clear" slot="end" (click)="showAddItemPrompt()">
+            <ion-icon slot="icon-only" name="add-circle-outline" size="large"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </div>
       
       <ion-list *ngIf="filteredItems.length > 0">
-        <ion-item-sliding *ngFor="let item of filteredItems">
-          <ion-item>
-            <ion-thumbnail slot="start">
-              <img [src]="item.image || 'assets/items/default-item.png'" alt="{{ item.name }}">
-            </ion-thumbnail>
-            <ion-label>
-              <h2>{{ item.name }}</h2>
-              <p>{{ item.description }}</p>
-              <p>
-                <ion-badge [color]="
-                  item.status === 'available' ? 'success' : 
-                  item.status === 'borrowed' ? 'warning' : 
-                  item.status === 'maintenance' ? 'danger' : 'medium'">
-                  {{ item.status }}
-                </ion-badge>
-                <ion-badge color="primary" class="ion-margin-start">{{ item.department }}</ion-badge>
-              </p>
-              <p class="ion-text-muted">Code: {{ item.productCode }}</p>
-            </ion-label>
-          </ion-item>
-          
-          <ion-item-options side="end">
-            <ion-item-option color="primary" (click)="editItem(item)">
-              <ion-icon slot="icon-only" name="create-outline"></ion-icon>
-            </ion-item-option>
-            <ion-item-option color="danger" (click)="deleteItem(item)">
-              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-            </ion-item-option>
-          </ion-item-options>
-        </ion-item-sliding>
+        <ion-item *ngFor="let item of filteredItems" button (click)="showItemOptions(item)">
+          <ion-thumbnail slot="start" class="item-thumbnail">
+            <img [src]="item.image || '/assets/items/default-item.png'" alt="{{ item.name }}">
+          </ion-thumbnail>
+          <ion-label>
+            <h2>{{ item.name }}</h2>
+            <p>{{ item.description }}</p>
+            <p>
+              <ion-badge [color]="
+                item.status === 'available' ? 'success' : 
+                item.status === 'borrowed' ? 'warning' : 
+                item.status === 'maintenance' ? 'danger' : 'medium'">
+                {{ item.status }}
+              </ion-badge>
+              <ion-badge color="primary" class="ion-margin-start">{{ item.department }}</ion-badge>
+            </p>
+            <p class="ion-text-muted">Code: {{ item.productCode }}</p>
+          </ion-label>
+          <ion-icon name="ellipsis-vertical" slot="end"></ion-icon>
+        </ion-item>
       </ion-list>
       
       <div *ngIf="filteredItems.length === 0" class="ion-text-center ion-padding">
-        <ion-icon name="alert-circle" color="medium" style="font-size: 48px;"></ion-icon>
+        <ion-icon name="cube-outline" color="medium" style="font-size: 48px;"></ion-icon>
         <h3>No items found</h3>
-        <p>No items match your search criteria or no items have been added yet.</p>
+        <p>Add some items to get started.</p>
       </div>
+
+
     </div>
   </div>
 </ion-content>

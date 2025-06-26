@@ -28,7 +28,7 @@ export interface BorrowRequest {
   reason: string;
   purpose?: string; // Added missing property
   department: string;
-  status: 'waiting' | 'approved' | 'not_approved' | 'returned';
+  status: 'waiting' | 'approved' | 'rejected' | 'not_approved' | 'returned';
   approvedBy?: string;
   approvalDate?: Date | any;
   notes?: string;
