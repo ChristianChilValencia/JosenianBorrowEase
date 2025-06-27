@@ -22,7 +22,7 @@
     <!-- Segment selector for switching views -->
     <ion-segment [(ngModel)]="segmentValue" (ionChange)="segmentChanged($event)">
       <ion-segment-button value="pendingRequests">
-        <ion-label>Pending Requests</ion-label>
+        <ion-label>Requests</ion-label>
       </ion-segment-button>
       <ion-segment-button value="manageItems">
         <ion-label>Manage Items</ion-label>
@@ -50,7 +50,12 @@
               <ion-grid>
                 <ion-row>
                   <ion-col size="4">
-                    <img [src]="request.itemImage || 'assets/items/default-item.png'" alt="{{ request.itemName }}" style="max-width: 100px; max-height: 100px; border-radius: 8px; margin-bottom: 8px;">
+                    <div *ngIf="request.itemImage" class="request-image">
+                      <img [src]="request.itemImage" alt="{{ request.itemName }}">
+                    </div>
+                    <div *ngIf="!request.itemImage" class="no-image-placeholder">
+                      <ion-icon name="image-outline"></ion-icon>
+                    </div>
                   </ion-col>
                   <ion-col size="8">
                     <p><strong>Requested by:</strong> {{ request.requesterName }}</p>
@@ -105,7 +110,10 @@
       <ion-list *ngIf="filteredItems.length > 0">
         <ion-item *ngFor="let item of filteredItems" button (click)="showItemOptions(item)">
           <ion-thumbnail slot="start" class="item-thumbnail">
-            <img [src]="item.image || '/assets/items/default-item.png'" alt="{{ item.name }}">
+            <img *ngIf="item.image" [src]="item.image" alt="{{ item.name }}">
+            <div *ngIf="!item.image" class="no-image-placeholder">
+              <ion-icon name="image-outline"></ion-icon>
+            </div>
           </ion-thumbnail>
           <ion-label>
             <h2>{{ item.name }}</h2>

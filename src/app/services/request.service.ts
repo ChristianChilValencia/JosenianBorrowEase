@@ -57,15 +57,22 @@ export class RequestService {
   async getAllRequests(): Promise<BorrowRequest[]> {
     try {
       const requestsRef = collection(this.firestore, this.requestsCollection);
-      const q = query(requestsRef, orderBy('requestDate', 'desc'));
-      const snapshot = await getDocs(q);
+      // Get all requests without ordering in the query
+      const snapshot = await getDocs(requestsRef);
       
       const requests = snapshot.docs.map(doc => {
         const data = doc.data() as BorrowRequest;
         return { ...data, id: doc.id };
       });
       
-      return requests;
+      // Sort in memory instead of in the query
+      const sortedRequests = requests.sort((a, b) => {
+        const dateA = a.requestDate ? new Date(a.requestDate).getTime() : 0;
+        const dateB = b.requestDate ? new Date(b.requestDate).getTime() : 0;
+        return dateB - dateA; // descending order
+      });
+      
+      return sortedRequests;
     } catch (error) {
       console.error('Error getting requests:', error);
       throw error;
@@ -77,11 +84,11 @@ export class RequestService {
     try {
       const requestsRef = collection(this.firestore, this.requestsCollection);
       
-      // Create the query - need to create a Firebase index for this
+      // Simplified query that only filters by status without ordering
+      // This avoids the need for a composite index
       const q = query(
         requestsRef,
-        where('status', '==', status),
-        orderBy('requestDate', 'desc')
+        where('status', '==', status)
       );
       
       try {
@@ -92,8 +99,16 @@ export class RequestService {
           return { ...data, id: doc.id };
         });
         
-        this.filteredRequestsSubject.next(requests);
-        return requests;
+        // Sort the results in memory instead of in the query
+        // This eliminates the need for the Firestore index
+        const sortedRequests = requests.sort((a, b) => {
+          const dateA = a.requestDate ? new Date(a.requestDate).getTime() : 0;
+          const dateB = b.requestDate ? new Date(b.requestDate).getTime() : 0;
+          return dateB - dateA; // descending order
+        });
+        
+        this.filteredRequestsSubject.next(sortedRequests);
+        return sortedRequests;
       } catch (error: any) {
         // Check for missing index error
         if (error.code === 'failed-precondition' && error.message.includes('index')) {
@@ -136,11 +151,10 @@ export class RequestService {
     try {
       const requestsRef = collection(this.firestore, this.requestsCollection);
       
-      // Create the query - need to create a Firebase index for this
+      // Simplified query that only filters by user without ordering
       const q = query(
         requestsRef,
-        where('requesterEmail', '==', userId),
-        orderBy('requestDate', 'desc')
+        where('requesterEmail', '==', userId)
       );
       
       try {
@@ -151,7 +165,14 @@ export class RequestService {
           return { ...data, id: doc.id };
         });
         
-        return requests;
+        // Sort in memory instead of in the query
+        const sortedRequests = requests.sort((a, b) => {
+          const dateA = a.requestDate ? new Date(a.requestDate).getTime() : 0;
+          const dateB = b.requestDate ? new Date(b.requestDate).getTime() : 0;
+          return dateB - dateA; // descending order
+        });
+        
+        return sortedRequests;
       } catch (error: any) {
         // Check for missing index error
         if (error.code === 'failed-precondition' && error.message.includes('index')) {

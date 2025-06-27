@@ -1,0 +1,96 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ isEditMode ? 'Edit Item' : 'Add New Item' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="itemForm" (ngSubmit)="submitForm()">
+    <ion-list lines="full" class="ion-margin">
+      <ion-item>
+        <ion-label position="floating">Item Name *</ion-label>
+        <ion-input formControlName="name" required type="text"></ion-input>
+      </ion-item>
+      <div class="validation-error" *ngIf="itemForm.get('name')?.invalid && itemForm.get('name')?.touched">
+        <ion-text color="danger">Item name is required</ion-text>
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Description *</ion-label>
+        <ion-textarea formControlName="description" required rows="3"></ion-textarea>
+      </ion-item>
+      <div class="validation-error" *ngIf="itemForm.get('description')?.invalid && itemForm.get('description')?.touched">
+        <ion-text color="danger">Description is required</ion-text>
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Product Code *</ion-label>
+        <ion-input formControlName="productCode" required type="text"></ion-input>
+      </ion-item>
+      <div class="validation-error" *ngIf="itemForm.get('productCode')?.invalid && itemForm.get('productCode')?.touched">
+        <ion-text color="danger">Product code is required</ion-text>
+      </div>
+
+      <ion-item>
+        <ion-label>Department *</ion-label>
+        <ion-select formControlName="department" interface="action-sheet" placeholder="Select department">
+          <ion-select-option *ngFor="let dept of departmentOptions" [value]="dept">{{ dept }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <div class="validation-error" *ngIf="itemForm.get('department')?.invalid && itemForm.get('department')?.touched">
+        <ion-text color="danger">Department is required</ion-text>
+      </div>
+
+      <ion-item>
+        <ion-label>Status *</ion-label>
+        <ion-select formControlName="status" interface="action-sheet" placeholder="Select status">
+          <ion-select-option *ngFor="let status of statusOptions" [value]="status">
+            {{ status.replace('_', ' ').toUpperCase() }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      <div class="validation-error" *ngIf="itemForm.get('status')?.invalid && itemForm.get('status')?.touched">
+        <ion-text color="danger">Status is required</ion-text>
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Item Image *</ion-label>
+        <ion-select formControlName="image" interface="action-sheet" placeholder="Select an image" (ionChange)="onImageChange($event)" required>
+          <ion-select-option *ngFor="let img of imageOptions" [value]="img.path">
+            {{ img.name }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      <div class="validation-error" *ngIf="itemForm.get('image')?.invalid && itemForm.get('image')?.touched">
+        <ion-text color="danger">Please select an image</ion-text>
+      </div>
+
+      <!-- Image Preview -->
+      <div class="image-preview ion-margin-vertical ion-padding-horizontal" *ngIf="selectedImagePath && selectedImagePath.trim() !== ''">
+        <p><strong>Selected Image Preview:</strong></p>
+        <img [src]="selectedImagePath" alt="Selected item image" style="max-width: 100%; max-height: 150px; border-radius: 8px;">
+      </div>
+      <!-- No image selected notice -->
+      <div class="image-preview ion-margin-vertical ion-padding-horizontal" *ngIf="!selectedImagePath || selectedImagePath.trim() === ''">
+        <p><ion-text color="medium"><ion-icon name="image-outline"></ion-icon> No image selected. Please choose an image from the list.</ion-text></p>
+      </div>
+    </ion-list>
+
+    <div class="ion-padding">
+      <ion-button expand="block" type="submit" [disabled]="itemForm.invalid || isSubmitting">
+        <ion-icon name="save-outline" slot="start"></ion-icon>
+        {{ isEditMode ? 'Update Item' : 'Add Item' }}
+      </ion-button>
+
+      <ion-button expand="block" color="medium" (click)="dismiss()" class="ion-margin-top">
+        <ion-icon name="close-outline" slot="start"></ion-icon>
+        Cancel
+      </ion-button>
+    </div>
+  </form>
+</ion-content>

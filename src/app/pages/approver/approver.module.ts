@@ -7,6 +7,7 @@ import { IonicModule } from '@ionic/angular';
 import { ApproverPageRoutingModule } from './approver-routing.module';
 
 import { ApproverPage } from './approver.page';
+import { CrudComponent } from '../../components/crud/crud.component';
 
 @NgModule({
   imports: [
@@ -14,7 +15,8 @@ import { ApproverPage } from './approver.page';
     FormsModule,
     ReactiveFormsModule,
     IonicModule,
-    ApproverPageRoutingModule
+    ApproverPageRoutingModule,
+    CrudComponent // Import the standalone component
   ],
   declarations: [ApproverPage],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]

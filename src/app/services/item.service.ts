@@ -56,15 +56,22 @@ export class ItemService {
   async getAllItems(): Promise<Item[]> {
     try {
       const itemsRef = collection(this.firestore, this.itemsCollection);
-      const q = query(itemsRef, orderBy('dateAdded', 'desc'));
-      const snapshot = await getDocs(q);
+      // Get all items without ordering in the query
+      const snapshot = await getDocs(itemsRef);
       
       const items = snapshot.docs.map(doc => {
         const data = doc.data() as Item;
         return { ...data, id: doc.id };
       });
       
-      return items;
+      // Sort in memory instead of in the query
+      const sortedItems = items.sort((a, b) => {
+        const dateA = a.dateAdded ? new Date(a.dateAdded).getTime() : 0;
+        const dateB = b.dateAdded ? new Date(b.dateAdded).getTime() : 0;
+        return dateB - dateA; // descending order
+      });
+      
+      return sortedItems;
     } catch (error) {
       console.error('Error getting items:', error);
       throw error;
@@ -79,10 +86,10 @@ export class ItemService {
       }
       
       const itemsRef = collection(this.firestore, this.itemsCollection);
+      // Simplified query - only filter by department without ordering
       const q = query(
         itemsRef,
-        where('department', '==', department),
-        orderBy('dateAdded', 'desc')
+        where('department', '==', department)
       );
       
       const snapshot = await getDocs(q);
@@ -92,8 +99,15 @@ export class ItemService {
         return { ...data, id: doc.id };
       });
       
-      this.filteredItemsSubject.next(items);
-      return items;
+      // Sort in memory
+      const sortedItems = items.sort((a, b) => {
+        const dateA = a.dateAdded ? new Date(a.dateAdded).getTime() : 0;
+        const dateB = b.dateAdded ? new Date(b.dateAdded).getTime() : 0;
+        return dateB - dateA; // descending order
+      });
+      
+      this.filteredItemsSubject.next(sortedItems);
+      return sortedItems;
     } catch (error) {
       console.error('Error getting items by department:', error);
       throw error;
@@ -145,6 +159,8 @@ export class ItemService {
   // Add a new item
   async addItem(item: Item, imageFile?: File): Promise<string> {
     try {
+      console.log('Adding item with image path:', item.image);
+      
       // Set status to available by default if not provided
       if (!item.status) {
         item.status = 'available';
@@ -155,6 +171,16 @@ export class ItemService {
         item.dateAdded = Timestamp.now();
       }
       
+      // Ensure image path is set correctly if provided
+      if (item.image) {
+        // Make sure the path starts with a slash
+        if (!item.image.startsWith('/')) {
+          item.image = '/' + item.image;
+        }
+      }
+      
+      console.log('Final image path for new item:', item.image);
+      
       // If image file is provided, try to upload it
       if (imageFile) {
         try {
@@ -162,24 +188,11 @@ export class ItemService {
           const imageUrl = await this.uploadImage(imageFile);
           item.image = imageUrl;
         } catch (uploadError) {
-          console.warn('Firebase Storage upload failed, using local asset fallback:', uploadError);
-          
-          // Match the file extension to use an appropriate fallback image
-          const fileName = imageFile.name.toLowerCase();
-          if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
-            item.image = 'assets/items/default-item.png';
-          } else if (fileName.endsWith('.png')) {
-            item.image = 'assets/items/default-item.png';
-          } else {
-            item.image = 'assets/items/default-item.png';
-          }
+          console.warn('Firebase Storage upload failed:', uploadError);
           
           // Add image metadata to the item description so we know what the original image was
           item.description += `\n\nOriginal image: ${imageFile.name} (${Math.round(imageFile.size / 1024)} KB)`;
         }
-      } else {
-        // No image provided, use default
-        item.image = 'assets/items/default-item.png';
       }
       
       // Add the item to Firestore
@@ -245,7 +258,18 @@ export class ItemService {
   // Update an item
   async updateItem(id: string, item: Partial<Item>, imageFile?: File): Promise<void> {
     try {
+      console.log('Updating item with ID:', id, 'and image path:', item.image);
       const itemRef = doc(this.firestore, this.itemsCollection, id);
+      
+      // Ensure image path is set correctly if provided
+      if (item.image) {
+        // Make sure the path starts with a slash
+        if (!item.image.startsWith('/')) {
+          item.image = '/' + item.image;
+        }
+      }
+      
+      console.log('Final image path for update:', item.image);
       
       // If image file is provided, upload it
       if (imageFile) {

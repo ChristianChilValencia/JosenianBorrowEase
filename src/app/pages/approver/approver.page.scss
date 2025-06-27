@@ -47,6 +47,21 @@ ion-fab {
     height: 100%;
     object-fit: cover;
   }
+  
+  // Style for placeholder when no image is available
+  .no-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f0f0;
+    
+    ion-icon {
+      font-size: 32px;
+      color: #999;
+    }
+  }
 }
 
 // Style for request thumbnails
@@ -58,4 +73,36 @@ ion-card ion-col img {
   border-radius: 8px;
   margin-bottom: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+// Style for request images
+.request-image {
+  max-width: 100px;
+  max-height: 100px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+// Style for no-image placeholder in requests
+.no-image-placeholder {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  
+  ion-icon {
+    font-size: 36px;
+    color: #999;
+  }
 }
